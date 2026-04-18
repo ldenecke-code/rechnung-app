@@ -24,16 +24,16 @@ jobs:
 
       - name: EXE bauen
         run: |
-          pyinstaller --onefile --windowed `
+          pyinstaller --onedir --windowed `
             --name "Cleancare-Rechnung" `
             --add-data "templates;templates" `
             --add-data "static;static" `
             --icon "static/logo.ico" `
             main.py
 
-      - name: EXE als Artefakt hochladen
+      - name: Ordner als Artefakt hochladen
         uses: actions/upload-artifact@v4
         with:
           name: Cleancare-Rechnung-Windows
-          path: dist/Cleancare-Rechnung.exe
+          path: dist/Cleancare-Rechnung/
           retention-days: 90
