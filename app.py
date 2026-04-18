@@ -1,14 +1,28 @@
 import io
 import os
-from flask import Flask, render_template, request, send_file
+import sys
+from pathlib import Path
+from flask import Flask, render_template, request, send_file, jsonify
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.units import mm
 from reportlab.lib import colors
 from reportlab.pdfgen import canvas as rl_canvas
 
-app = Flask(__name__)
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-LOGO_PATH = os.path.join(BASE_DIR, "static", "logo.png")
+
+def resource_path(relative: str) -> str:
+    """Absoluter Pfad zu einer Ressource – funktioniert sowohl im Dev-Modus
+    als auch in einer PyInstaller-gebündelten .exe."""
+    if hasattr(sys, "_MEIPASS"):
+        return os.path.join(sys._MEIPASS, relative)
+    return os.path.join(os.path.dirname(os.path.abspath(__file__)), relative)
+
+
+app = Flask(
+    __name__,
+    template_folder=resource_path("templates"),
+    static_folder=resource_path("static"),
+)
+LOGO_PATH = resource_path(os.path.join("static", "logo.png"))
 
 # ── Page geometry ─────────────────────────────────────────────────────────────
 PW, PH = A4          # 595.28 × 841.89 pt
@@ -352,11 +366,23 @@ def generate_pdf():
     }
 
     pdf_bytes = build_pdf(data)
+    filename = f"Rechnung_{data['rechnungsnr'] or 'neu'}.pdf"
+
+    # Desktop-Modus (PyInstaller .exe): PDF direkt in Downloads speichern
+    if getattr(sys, "frozen", False):
+        downloads = Path.home() / "Downloads"
+        downloads.mkdir(exist_ok=True)
+        filepath = downloads / filename
+        with open(filepath, "wb") as fh:
+            fh.write(pdf_bytes)
+        return jsonify({"success": True, "filename": filename, "path": str(filepath)})
+
+    # Browser-Modus: PDF als Download streamen
     return send_file(
         io.BytesIO(pdf_bytes),
         mimetype="application/pdf",
         as_attachment=True,
-        download_name=f"Rechnung_{data['rechnungsnr'] or 'neu'}.pdf",
+        download_name=filename,
     )
 
 
