@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Rechnung erstellen – Cleancare</title>
+  <title>Rechnung – Cleancare</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -12,22 +12,22 @@
       background: #f0f4f8;
       color: #1a2b3c;
       min-height: 100vh;
-      padding: 24px 16px 48px;
+      padding: 24px 16px 60px;
     }
 
     header {
-      max-width: 800px;
+      max-width: 820px;
       margin: 0 auto 28px;
       background: #1a3a5c;
       color: white;
       border-radius: 10px;
       padding: 20px 28px;
     }
-    header h1 { font-size: 1.4rem; font-weight: 700; }
-    header p  { font-size: 0.85rem; opacity: 0.75; margin-top: 4px; }
+    header h1 { font-size: 1.35rem; font-weight: 700; }
+    header p  { font-size: 0.82rem; opacity: 0.7; margin-top: 4px; }
 
     form {
-      max-width: 800px;
+      max-width: 820px;
       margin: 0 auto;
       display: flex;
       flex-direction: column;
@@ -38,12 +38,12 @@
       background: white;
       border-radius: 10px;
       padding: 24px;
-      box-shadow: 0 1px 4px rgba(0,0,0,.08);
+      box-shadow: 0 1px 5px rgba(0,0,0,.07);
     }
     .card h2 {
-      font-size: 0.85rem;
+      font-size: 0.78rem;
       text-transform: uppercase;
-      letter-spacing: .06em;
+      letter-spacing: .07em;
       color: #1a3a5c;
       margin-bottom: 16px;
       padding-bottom: 8px;
@@ -52,19 +52,20 @@
 
     .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
     .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
-    @media (max-width: 560px) {
-      .grid-2, .grid-3 { grid-template-columns: 1fr; }
+    .grid-4 { display: grid; grid-template-columns: 1fr 1fr 80px 1fr; gap: 14px; }
+    @media (max-width: 580px) {
+      .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
     }
 
     label {
       display: flex;
       flex-direction: column;
       gap: 5px;
-      font-size: 0.82rem;
+      font-size: 0.81rem;
       font-weight: 600;
       color: #445566;
     }
-    label span.req { color: #c0392b; }
+    .req { color: #c0392b; }
 
     input, textarea, select {
       border: 1.5px solid #d0dce8;
@@ -73,45 +74,37 @@
       font-size: 0.92rem;
       font-family: inherit;
       background: #fafcff;
-      transition: border-color .15s;
       width: 100%;
+      transition: border-color .15s;
     }
     input:focus, textarea:focus, select:focus {
       outline: none;
       border-color: #1a3a5c;
-      background: white;
+      background: #fff;
     }
-    textarea { resize: vertical; min-height: 80px; }
+    textarea { resize: vertical; min-height: 86px; }
 
-    /* ── Positions-Tabelle ── */
-    #positionen-wrap { overflow-x: auto; }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 0.88rem;
-    }
+    /* ── Positionstabelle ─────────────────────────────────── */
+    .tbl-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
     thead th {
       background: #1a3a5c;
-      color: white;
-      padding: 9px 10px;
+      color: #fff;
+      padding: 9px 8px;
       text-align: left;
       font-weight: 600;
       white-space: nowrap;
     }
     tbody tr:nth-child(even) { background: #f4f8fc; }
-    tbody td { padding: 6px 6px; vertical-align: middle; }
+    tbody td { padding: 5px 5px; vertical-align: middle; }
     tbody td input { background: transparent; border: 1.5px solid #d0dce8; }
-    tbody td input:focus { background: white; }
-    .td-calc { text-align: right; font-weight: 600; color: #1a3a5c; padding-right: 10px; white-space: nowrap; }
-    .td-del { text-align: center; }
+    tbody td input:focus { background: #fff; }
+    .td-r  { text-align: right; }
+    .td-calc { text-align: right; font-weight: 600; color: #1a3a5c;
+               padding-right: 8px; white-space: nowrap; }
     .btn-del {
-      background: none;
-      border: none;
-      cursor: pointer;
-      color: #c0392b;
-      font-size: 1.1rem;
-      line-height: 1;
-      padding: 2px 6px;
+      background: none; border: none; cursor: pointer;
+      color: #c0392b; font-size: 1.05rem; padding: 2px 7px;
       border-radius: 4px;
     }
     .btn-del:hover { background: #fdecea; }
@@ -123,7 +116,7 @@
       color: #1a3a5c;
       border-radius: 6px;
       padding: 7px 16px;
-      font-size: 0.85rem;
+      font-size: 0.83rem;
       font-weight: 600;
       cursor: pointer;
       display: inline-flex;
@@ -133,35 +126,26 @@
     }
     .btn-add:hover { background: #e8f0f8; }
 
-    /* ── Summen ── */
+    /* ── Summen ───────────────────────────────────────────── */
     .summen {
-      display: flex;
-      flex-direction: column;
-      align-items: flex-end;
-      gap: 4px;
-      margin-top: 14px;
-      font-size: 0.9rem;
+      display: flex; flex-direction: column;
+      align-items: flex-end; gap: 5px;
+      margin-top: 16px; font-size: 0.9rem;
     }
-    .summen .row { display: flex; gap: 20px; }
-    .summen .label-s { color: #445566; }
-    .summen .val     { font-weight: 700; min-width: 100px; text-align: right; }
-    .summen .total .label-s,
-    .summen .total .val { font-size: 1.05rem; color: #1a3a5c; }
-    .summen .divider { width: 220px; border-top: 2px solid #1a3a5c; margin: 4px 0; }
+    .sumrow { display: flex; gap: 20px; }
+    .slbl  { color: #445566; }
+    .sval  { font-weight: 700; min-width: 110px; text-align: right; }
+    .sdiv  { width: 240px; border-top: 2px solid #1a3a5c; margin: 3px 0; }
+    .stot .slbl, .stot .sval { font-size: 1.05rem; color: #1a3a5c; }
 
-    /* ── Submit ── */
+    /* ── Submit ───────────────────────────────────────────── */
     .btn-submit {
-      background: #1a3a5c;
-      color: white;
-      border: none;
-      border-radius: 8px;
+      background: #1a3a5c; color: white;
+      border: none; border-radius: 8px;
       padding: 14px 28px;
-      font-size: 1rem;
-      font-weight: 700;
+      font-size: 1rem; font-weight: 700;
       cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 8px;
+      display: flex; align-items: center; gap: 8px;
       align-self: flex-end;
       transition: background .15s;
     }
@@ -173,91 +157,104 @@
 
 <header>
   <h1>Cleancare Systemreinigung UG</h1>
-  <p>Rechnungen erstellen &amp; als PDF herunterladen</p>
+  <p>Rechnung erstellen &amp; als PDF herunterladen</p>
 </header>
 
 <form action="/pdf" method="POST">
 
-  <!-- ── Rechnungsdaten ── -->
+  <!-- Rechnungsdaten -->
   <div class="card">
     <h2>Rechnungsdaten</h2>
     <div class="grid-3">
       <label>
-        Rechnungsnummer <span class="req">*</span>
+        <span>Rechnungsnummer <span class="req">*</span></span>
         <input type="text" name="rechnungsnr" required placeholder="z. B. 18020" />
       </label>
       <label>
-        Rechnungsdatum <span class="req">*</span>
-        <input type="date" name="datum" required id="datum" />
+        <span>Rechnungsdatum <span class="req">*</span></span>
+        <input type="date" name="datum" id="datum" required />
       </label>
       <label>
-        Kundennummer
+        <span>Kundennummer</span>
         <input type="text" name="kundennr" placeholder="z. B. 15113" />
       </label>
     </div>
   </div>
 
-  <!-- ── Kunde ── -->
+  <!-- Kunde -->
   <div class="card">
-    <h2>Kunde &amp; Einsatzort</h2>
-    <div class="grid-2">
-      <label>
-        Kundenname &amp; Adresse <span class="req">*</span>
-        <textarea name="kunde" required placeholder="Max Mustermann&#10;Musterstraße 1&#10;12345 Musterstadt"></textarea>
+    <h2>Kunde</h2>
+    <label>
+      <span>Name &amp; Adresse des Kunden <span class="req">*</span></span>
+      <textarea name="kunde" required
+        placeholder="Mustermann GmbH&#10;Musterstraße 1&#10;12345 Musterstadt"></textarea>
+    </label>
+  </div>
+
+  <!-- Einsatzort -->
+  <div class="card">
+    <h2>Einsatzort</h2>
+    <div class="grid-2" style="margin-bottom:12px">
+      <label>Bezeichnung / Name
+        <input type="text" name="einsatzort_name" placeholder="z. B. Tankstelle Nord" />
       </label>
-      <label>
-        Einsatzort
-        <input type="text" name="einsatzort" placeholder="z. B. Tankstelle Hannover" />
+      <label>Straße &amp; Hausnummer
+        <input type="text" name="einsatzort_strasse" placeholder="z. B. Hauptstraße 42" />
+      </label>
+    </div>
+    <div class="grid-4">
+      <label style="grid-column:1">PLZ
+        <input type="text" name="einsatzort_plz" placeholder="37079" maxlength="10" />
+      </label>
+      <label style="grid-column:2/5">Ort
+        <input type="text" name="einsatzort_ort" placeholder="Göttingen" />
       </label>
     </div>
   </div>
 
-  <!-- ── Positionen ── -->
+  <!-- Positionen -->
   <div class="card">
     <h2>Positionen / Leistungen</h2>
-    <div id="positionen-wrap">
+    <div class="tbl-wrap">
       <table id="pos-table">
         <thead>
           <tr>
             <th style="width:50%">Leistung</th>
             <th style="width:10%">Anzahl</th>
-            <th style="width:16%">Einzelpreis (€)</th>
-            <th style="width:16%">Gesamtpreis</th>
+            <th style="width:17%">Einzelpreis (€)</th>
+            <th style="width:15%">Gesamt</th>
             <th style="width:8%"></th>
           </tr>
         </thead>
-        <tbody id="pos-body">
-          <!-- Zeilen werden per JS eingefügt -->
-        </tbody>
+        <tbody id="pos-body"></tbody>
       </table>
     </div>
     <button type="button" class="btn-add" onclick="addRow()">
-      <span>＋</span> Zeile hinzufügen
+      ＋ Zeile hinzufügen
     </button>
 
-    <div class="summen" id="summen">
-      <div class="row">
-        <span class="label-s">Netto:</span>
-        <span class="val" id="s-netto">0,00 €</span>
+    <div class="summen">
+      <div class="sumrow">
+        <span class="slbl">Netto:</span>
+        <span class="sval" id="s-netto">0,00 €</span>
       </div>
-      <div class="row">
-        <span class="label-s" id="s-mwst-label">MwSt. 19%:</span>
-        <span class="val" id="s-mwst">0,00 €</span>
+      <div class="sumrow">
+        <span class="slbl" id="s-mwst-lbl">MwSt. 19 %:</span>
+        <span class="sval" id="s-mwst">0,00 €</span>
       </div>
-      <div class="divider"></div>
-      <div class="row total">
-        <span class="label-s">Gesamt:</span>
-        <span class="val" id="s-gesamt">0,00 €</span>
+      <div class="sdiv"></div>
+      <div class="sumrow stot">
+        <span class="slbl">Gesamt:</span>
+        <span class="sval" id="s-ges">0,00 €</span>
       </div>
     </div>
   </div>
 
-  <!-- ── MwSt ── -->
+  <!-- Steuer -->
   <div class="card">
     <h2>Steuer</h2>
-    <label style="max-width:220px">
-      MwSt.-Satz
-      <select name="mwst" id="mwst-select" onchange="recalc()">
+    <label style="max-width:240px">MwSt.-Satz
+      <select name="mwst" id="mwst-sel" onchange="recalc()">
         <option value="19" selected>19 % (Regelbesteuerung)</option>
         <option value="0">0 % (Kleinunternehmer)</option>
       </select>
@@ -265,7 +262,8 @@
   </div>
 
   <button type="submit" class="btn-submit">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+         stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
       <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
       <polyline points="7 10 12 15 17 10"/>
       <line x1="12" y1="15" x2="12" y2="3"/>
@@ -276,58 +274,59 @@
 </form>
 
 <script>
-  // Heutiges Datum vorausfüllen
   document.getElementById("datum").valueAsDate = new Date();
 
   let rowId = 0;
 
-  function fmt(n) {
-    return n.toLocaleString("de-DE", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " €";
-  }
+  const fmt = n =>
+    n.toLocaleString("de-DE", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " €";
 
-  function addRow(leistung, anzahl, preis) {
+  function addRow(leistung = "", anzahl = 1, preis = "") {
     const id = rowId++;
     const tr = document.createElement("tr");
     tr.id = "row-" + id;
     tr.innerHTML = `
-      <td><input type="text"   name="leistung[]"    value="${leistung || ''}" placeholder="Leistungsbeschreibung" /></td>
-      <td><input type="number" name="anzahl[]"       value="${anzahl  || 1}"  min="0" step="any" style="width:68px" oninput="recalc()" /></td>
-      <td><input type="number" name="einzelpreis[]"  value="${preis   || ''}" min="0" step="0.01" placeholder="0,00" oninput="recalc()" /></td>
+      <td><input type="text"   name="leistung[]"   value="${leistung}"
+                 placeholder="Leistungsbeschreibung" /></td>
+      <td><input type="number" name="anzahl[]"      value="${anzahl}"
+                 min="0" step="any" style="width:68px" oninput="recalc()" /></td>
+      <td><input type="number" name="einzelpreis[]" value="${preis}"
+                 min="0" step="0.01" placeholder="0,00" oninput="recalc()" /></td>
       <td class="td-calc" id="calc-${id}">0,00 €</td>
-      <td class="td-del"><button type="button" class="btn-del" onclick="removeRow('row-${id}')" title="Zeile löschen">✕</button></td>`;
+      <td class="td-r">
+        <button type="button" class="btn-del"
+                onclick="removeRow('row-${id}')" title="Löschen">✕</button>
+      </td>`;
     document.getElementById("pos-body").appendChild(tr);
     recalc();
   }
 
   function removeRow(id) {
-    const el = document.getElementById(id);
-    if (el) el.remove();
+    document.getElementById(id)?.remove();
     recalc();
   }
 
   function recalc() {
-    const rows = document.querySelectorAll("#pos-body tr");
     let netto = 0;
-    rows.forEach(tr => {
+    document.querySelectorAll("#pos-body tr").forEach(tr => {
       const a = parseFloat(tr.querySelector('[name="anzahl[]"]').value)      || 0;
       const p = parseFloat(tr.querySelector('[name="einzelpreis[]"]').value) || 0;
       const g = a * p;
       netto += g;
-      const calcId = tr.id.replace("row-", "calc-");
-      const calcEl = document.getElementById(calcId);
-      if (calcEl) calcEl.textContent = fmt(g);
+      const cid = tr.id.replace("row-", "calc-");
+      const cel = document.getElementById(cid);
+      if (cel) cel.textContent = fmt(g);
     });
-    const satz    = parseFloat(document.getElementById("mwst-select").value) || 0;
-    const mwst    = netto * (satz / 100);
-    const gesamt  = netto + mwst;
-
-    document.getElementById("s-netto").textContent       = fmt(netto);
-    document.getElementById("s-mwst").textContent        = fmt(mwst);
-    document.getElementById("s-gesamt").textContent      = fmt(gesamt);
-    document.getElementById("s-mwst-label").textContent  = `MwSt. ${satz}%:`;
+    const satz   = parseFloat(document.getElementById("mwst-sel").value) || 0;
+    const mwst   = netto * satz / 100;
+    const gesamt = netto + mwst;
+    document.getElementById("s-netto").textContent    = fmt(netto);
+    document.getElementById("s-mwst").textContent     = fmt(mwst);
+    document.getElementById("s-ges").textContent      = fmt(gesamt);
+    document.getElementById("s-mwst-lbl").textContent = `MwSt. ${satz} %:`;
   }
 
-  // Zwei Startezeilen
+  // Zwei Startzeilen
   addRow("", 1, "");
   addRow("Anfahrtspauschale AP", 1, "");
 </script>
