@@ -28,6 +28,7 @@ jobs:
             --name "Cleancare-Rechnung" `
             --add-data "templates;templates" `
             --add-data "static;static" `
+            --icon "static/logo.ico" `
             main.py
 
       - name: EXE als Artefakt hochladen
