@@ -300,18 +300,22 @@
     btn.disabled = true;
     btn.innerHTML = "⏳ Wird erstellt…";
 
-    try {
-      const resp = await fetch("/pdf", { method: "POST", body: new FormData(this) });
-      const ct = resp.headers.get("content-type") || "";
+    const isDesktop = typeof window.pywebview !== "undefined";
 
-      if (ct.includes("json")) {
-        // Desktop-Modus: Datei wurde auf der Festplatte gespeichert
+    try {
+      if (isDesktop) {
+        // ── Desktop-Modus: PDF als Base64 holen, dann nativen Speichern-Dialog ──
+        const resp = await fetch("/pdf-b64", { method: "POST", body: new FormData(this) });
         const d = await resp.json();
-        if (d.success) showToast("✅ Gespeichert: " + d.filename + "  (Downloads)");
+        const result = await window.pywebview.api.save_pdf(d.pdf, d.filename);
+        if (result.success) {
+          showToast("✅ Gespeichert: " + result.filename);
+        }
+        // Bei Abbrechen (cancelled) passiert nichts
       } else {
-        // Browser-Modus: Blob-Download auslösen
+        // ── Browser-Modus: Blob-Download auslösen ─────────────────────────────
+        const resp = await fetch("/pdf", { method: "POST", body: new FormData(this) });
         const blob = await resp.blob();
-        // Dateinamen aus Content-Disposition lesen, Fallback auf Rechnungsnr
         let fname = "Rechnung.pdf";
         const cd = resp.headers.get("content-disposition") || "";
         const m = cd.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);

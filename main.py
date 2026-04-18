@@ -2,13 +2,34 @@
 Desktop entry point: startet Flask im Hintergrund und öffnet ein natives Fenster.
 Wird von PyInstaller als main-Skript verwendet.
 """
+import base64
+import os
 import threading
 import time
-import sys
 import webview
 from app import app as flask_app
 
 PORT = 5000
+
+
+class Api:
+    """Wird als window.pywebview.api in JavaScript verfügbar."""
+
+    def save_pdf(self, b64data: str, default_filename: str) -> dict:
+        """Zeigt einen nativen Speichern-Dialog und schreibt das PDF."""
+        result = webview.windows[0].create_file_dialog(
+            webview.SAVE_DIALOG,
+            save_filename=default_filename,
+            file_types=("PDF Datei (*.pdf)",),
+        )
+        if not result:
+            return {"success": False, "cancelled": True}
+        filepath = result[0]
+        if not filepath.lower().endswith(".pdf"):
+            filepath += ".pdf"
+        with open(filepath, "wb") as fh:
+            fh.write(base64.b64decode(b64data))
+        return {"success": True, "filename": os.path.basename(filepath), "path": filepath}
 
 
 def run_flask() -> None:
@@ -18,7 +39,6 @@ def run_flask() -> None:
 def main() -> None:
     t = threading.Thread(target=run_flask, daemon=True)
     t.start()
-    # Kurz warten, bis Flask bereit ist
     time.sleep(0.9)
     webview.create_window(
         "Cleancare Rechnung",
@@ -27,6 +47,7 @@ def main() -> None:
         height=860,
         resizable=True,
         min_size=(640, 600),
+        js_api=Api(),
     )
     webview.start()
 

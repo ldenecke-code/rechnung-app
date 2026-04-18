@@ -327,14 +327,8 @@ def build_pdf(data: dict) -> bytes:
     return buf.read()
 
 
-@app.route("/", methods=["GET"])
-def index():
-    return render_template("index.html")
-
-
-@app.route("/pdf", methods=["POST"])
-def generate_pdf():
-    form = request.form
+def _parse_form(form):
+    """Gemeinsame Formular-Verarbeitung für beide PDF-Endpunkte."""
     positionen = []
     for l, a, p in zip(
         form.getlist("leistung[]"),
@@ -344,7 +338,6 @@ def generate_pdf():
         if l.strip():
             positionen.append({"leistung": l, "anzahl": a, "einzelpreis": p})
 
-    # Convert ISO date (2026-04-18) → German format (18.04.2026)
     datum_raw = form.get("datum", "")
     if datum_raw and len(datum_raw) == 10 and datum_raw[4] == "-":
         y, m, d = datum_raw.split("-")
@@ -352,7 +345,7 @@ def generate_pdf():
     else:
         datum_fmt = datum_raw
 
-    data = {
+    return {
         "datum":              datum_fmt,
         "rechnungsnr":        form.get("rechnungsnr", ""),
         "kundennr":           form.get("kundennr", ""),
@@ -365,25 +358,37 @@ def generate_pdf():
         "positionen":         positionen,
     }
 
+
+@app.route("/", methods=["GET"])
+def index():
+    return render_template("index.html")
+
+
+@app.route("/pdf", methods=["POST"])
+def generate_pdf():
+    """Browser-Modus: PDF direkt als Download streamen."""
+    data = _parse_form(request.form)
     pdf_bytes = build_pdf(data)
     filename = f"Rechnung_{data['rechnungsnr'] or 'neu'}.pdf"
-
-    # Desktop-Modus (PyInstaller .exe): PDF direkt in Downloads speichern
-    if getattr(sys, "frozen", False):
-        downloads = Path.home() / "Downloads"
-        downloads.mkdir(exist_ok=True)
-        filepath = downloads / filename
-        with open(filepath, "wb") as fh:
-            fh.write(pdf_bytes)
-        return jsonify({"success": True, "filename": filename, "path": str(filepath)})
-
-    # Browser-Modus: PDF als Download streamen
     return send_file(
         io.BytesIO(pdf_bytes),
         mimetype="application/pdf",
         as_attachment=True,
         download_name=filename,
     )
+
+
+@app.route("/pdf-b64", methods=["POST"])
+def generate_pdf_b64():
+    """Desktop-Modus: PDF als Base64-JSON zurückgeben (für PyWebView-Speicherdialog)."""
+    import base64
+    data = _parse_form(request.form)
+    pdf_bytes = build_pdf(data)
+    filename = f"Rechnung_{data['rechnungsnr'] or 'neu'}.pdf"
+    return jsonify({
+        "pdf": base64.b64encode(pdf_bytes).decode(),
+        "filename": filename,
+    })
 
 
 if __name__ == "__main__":
